@@ -1,3 +1,4 @@
+import matplotlib.pyplot as plt
 import pyvisa
 
 rm = pyvisa.ResourceManager("@py")
@@ -22,6 +23,10 @@ def volt_to_raw_value(volt):
     return raw_value
 
 
+# Create lists for the voltage and current through the LED
+U_list_LED = []
+I_list_LED = []
+
 # Up the current from min to max, measure and calculate voltages & current
 for voltage in range(0, 1024):
 
@@ -39,6 +44,10 @@ for voltage in range(0, 1024):
     # Calculate current for 220 Ohm resistor
     current = voltage_resistor / 220
 
+    # Append voltage and current to their corresponding lists
+    U_list_LED.append(voltage_LED)
+    I_list_LED.append(current)
+
     print(
         f"Outgoing voltage = {raw_value_to_volt(int(device.query("OUT:CH0?")))}, raw value = {device.query("OUT:CH0?")}"
     )
@@ -46,3 +55,15 @@ for voltage in range(0, 1024):
     print(
         f"Raw value voltage over resistor is {raw_value_resistor}. Voltage is {voltage_resistor}."
     )
+
+# Turn off LED after measurements
+device.query("OUT:CH0 0")
+
+plt.plot(
+    U_list_LED,
+    I_list_LED,
+)
+plt.title("I-U diagram of LED")
+plt.xlabel("Voltage U (V)")
+plt.ylabel("Current I (Amp)")
+plt.show()
