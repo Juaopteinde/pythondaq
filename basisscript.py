@@ -30,3 +30,4 @@ for voltage in range(0,1024):
     voltage_resistor = raw_value_to_volt(raw_value_resistor)
     print(f"Raw value voltage over LED is {raw_value_LED}. Voltage is {voltage_LED}.")
     print(f"Raw value voltage over resistor is {raw_value_resistor}. Voltage is {voltage_resistor}.")
+    biem
