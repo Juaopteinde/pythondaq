@@ -1,4 +1,5 @@
 import csv
+import os
 
 import matplotlib.pyplot as plt
 import pyvisa
@@ -62,13 +63,6 @@ for voltage in range(0, 1024):
 # Turn off LED after measurements
 device.query("OUT:CH0 0")
 
-
-with open("metingen.csv", "w", newline="") as csvfile:
-    writer = csv.writer(csvfile)
-    writer.writerow(["I", "U"])
-    for I_list_LED, U_list_LED in zip(I_list_LED, U_list_LED):
-        writer.writerow([I_list_LED, U_list_LED])
-
 plt.plot(
     U_list_LED,
     I_list_LED,
@@ -77,3 +71,21 @@ plt.title("I-U diagram of LED")
 plt.xlabel("Voltage U (V)")
 plt.ylabel("Current I (Amp)")
 plt.show()
+
+# Create a list of all files in the current directory
+current_directory = os.getcwd()
+entries = os.listdir(current_directory)
+
+# Check if the current filename already exists in the current directory, if not create a new filename
+filename = "metingen_0.csv"
+counter = 0
+while filename in entries:
+    filename = f"metingen_{counter}.csv"
+    counter += 1
+
+# Create file with the new filename
+with open(f"{filename}", "w", newline="") as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(["I", "U"])
+    for I_list_LED, U_list_LED in zip(I_list_LED, U_list_LED):
+        writer.writerow([I_list_LED, U_list_LED])
