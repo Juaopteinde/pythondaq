@@ -1,3 +1,5 @@
+import csv
+
 import matplotlib.pyplot as plt
 import pyvisa
 
@@ -56,8 +58,16 @@ for voltage in range(0, 1024):
         f"Raw value voltage over resistor is {raw_value_resistor}. Voltage is {voltage_resistor}."
     )
 
+
 # Turn off LED after measurements
 device.query("OUT:CH0 0")
+
+
+with open("metingen.csv", "w", newline="") as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(["I", "U"])
+    for I_list_LED, U_list_LED in zip(I_list_LED, U_list_LED):
+        writer.writerow([I_list_LED, U_list_LED])
 
 plt.plot(
     U_list_LED,
