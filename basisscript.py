@@ -3,28 +3,14 @@ import os
 
 import matplotlib.pyplot as plt
 import pyvisa
+from arduino_device import ArduinoVisaDevice, list_resources
 
-rm = pyvisa.ResourceManager("@py")
-ports = rm.list_resources()
-device = rm.open_resource(
-    "ASRL4::INSTR", read_termination="\r\n", write_termination="\n"
-)
-identification = device.query("*IDN?")
+# Get available ports
+list_resources()
 
-
-# Convert raw 10 bit value to volt
-def raw_value_to_volt(raw_value):
-    step = 3.3 / 1023
-    volt = raw_value * step
-    return volt
-
-
-# Convert volt to 10 bit value
-def volt_to_raw_value(volt):
-    step = 1023 / 3.3
-    raw_value = step * volt
-    return raw_value
-
+# Call on the class using the right port
+port = xxx
+arduino = ArduinoVisaDevice(port)
 
 # Create lists for the voltage and current through the LED
 U_list_LED = []
@@ -33,16 +19,14 @@ I_list_LED = []
 # Up the current from min to max, measure and calculate voltages & current
 for voltage in range(0, 1024):
 
-    # Change outgoing voltage
-    device.query(f"OUT:CH0 {voltage}")
+    # Change output voltage, in ADC values (0 - 1023)
+    arduino.set_output_value(value=voltage)
 
     # Measure voltages over resistor & LED
-    raw_value_resistor = int(device.query("MEAS:CH2?"))
-    raw_value_LED = int(device.query("MEAS:CH1?")) - int(device.query("MEAS:CH2?"))
-
-    # Convert raw values to volt
-    voltage_LED = raw_value_to_volt(raw_value_LED)
-    voltage_resistor = raw_value_to_volt(raw_value_resistor)
+    voltage_resistor = int(arduino.get_input_voltage(channel=2))
+    voltage_LED = int(arduino.get_input_voltage(channel=1)) - int(
+        arduino.get_input_voltage(channel=2)
+    )
 
     # Calculate current for 220 Ohm resistor
     current = voltage_resistor / 220
@@ -51,17 +35,15 @@ for voltage in range(0, 1024):
     U_list_LED.append(voltage_LED)
     I_list_LED.append(current)
 
+    print(f"Outgoing voltage = {arduino.get_output_value()}")
+    print(f"Raw value voltage over LED is {voltage_LED}. Voltage is {voltage_LED}.")
     print(
-        f"Outgoing voltage = {raw_value_to_volt(int(device.query("OUT:CH0?")))}, raw value = {device.query("OUT:CH0?")}"
-    )
-    print(f"Raw value voltage over LED is {raw_value_LED}. Voltage is {voltage_LED}.")
-    print(
-        f"Raw value voltage over resistor is {raw_value_resistor}. Voltage is {voltage_resistor}."
+        f"Raw value voltage over resistor is {voltage_resistor}. Voltage is {voltage_resistor}."
     )
 
 
 # Turn off LED after measurements
-device.query("OUT:CH0 0")
+arduino.set_output_value(value=0)
 
 plt.plot(
     U_list_LED,
