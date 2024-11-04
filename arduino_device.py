@@ -1,7 +1,9 @@
 import pyvisa
 
-rm = pyvisa.ResourceManager("@py")
-print(rm.list_resources())
+
+def list_resources():
+    rm = pyvisa.ResourceManager("@py")
+    print(rm.list_resources())
 
 
 class ArduinoVisaDevice:
