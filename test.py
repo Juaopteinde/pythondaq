@@ -4,13 +4,6 @@ rm = pyvisa.ResourceManager("@py")
 print(rm.list_resources())
 
 
-# Convert raw 10 bit ADC value to volt
-def raw_value_to_volt(raw_value):
-    step = 3.3 / 1023
-    volt = raw_value * step
-    return volt
-
-
 class ArduinoVisaDevice:
 
     # Define the device used by the rest of the class
@@ -24,10 +17,15 @@ class ArduinoVisaDevice:
         identification = self.device.quert("*IDN?")
         return identification
 
-    # Set ADC OUTPUT voltage on channel 0, ranging 0 - 1023
+    # Set voltage on channel 0, in ADC values (0 - 1023)
     def set_output_value(self, value):
         self.device.query(f"OUT:CH0 {value}")
         print(f"Set ADC OUTPUT voltage on channel 0 to {value}")
+
+    # Read and return the voltage on channel 0, in ADC values (0 - 1023)
+    def get_output_value(self):
+        output_value = self.device.query("OUT:CH0?")
+        return output_value
 
     # Read and return the voltage on the given channel, in ADC values (0 - 1023)
     def get_input_value(self, channel):
