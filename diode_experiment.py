@@ -16,8 +16,8 @@ class DiodeExperiment:
         # Create lists to store measurements
         voltages_scan_LED = []
         currents_scan_LED = []
-        sigma_voltage_LED_list = []
-        sigma_current_LED_list = []
+        sem_voltage_LED_list = []
+        sem_current_LED_list = []
 
         # Perform the measurements
         print("Starting scan")
@@ -40,32 +40,34 @@ class DiodeExperiment:
                 voltage_LED_list.append(voltage_LED)
                 current_LED_list.append(current)
 
+            # Convert to numpy arrays for efficiency
             voltage_LED_array = np.array(voltage_LED_list)
             current_LED_array = np.array(current_LED_list)
+
+            # Calculate mean of repeated measurement
             mean_voltage_LED = np.mean(voltage_LED_array)
             mean_current_LED = np.mean(current_LED_array)
-
-            sigma_voltage_LED = np.std(voltage_LED_array)
-            sigma_voltage_LED_list.append(sigma_voltage_LED)
-
-            sigma_current_LED = np.std(current_LED_array)
-            sigma_current_LED_list.append(sigma_current_LED)
-
-            # print(f"Voltage over the LED is {round(mean_voltage_LED, 3)} V")
-            # print(f"Current through the LED is {round(mean_current_LED, 6)} A")
 
             voltages_scan_LED.append(mean_voltage_LED)
             currents_scan_LED.append(mean_current_LED)
 
+            # Calculate standarddeviation of repeated measurement
+            sigma_voltage_LED = np.std(voltage_LED_array)
+            sigma_current_LED = np.std(current_LED_array)
+
+            # Calculate standard error of means of repeated measurement
+            sem_voltage_LED = sigma_voltage_LED / np.sqrt(repeats)
+            sem_current_LED = sigma_current_LED / np.sqrt(repeats)
+
+            sem_voltage_LED_list.append(sem_voltage_LED)
+            sem_current_LED_list.append(sem_current_LED)
+
         # Turn off lamp after scan
         self.arduino.set_output_value(value=0)
-
-        mean_sigma_voltage_LED = np.mean(sigma_voltage_LED_list)
-        mean_sigma_current_LED = np.mean(sigma_current_LED_list)
 
         return (
             voltages_scan_LED,
             currents_scan_LED,
-            mean_sigma_voltage_LED,
-            mean_sigma_current_LED,
+            sem_voltage_LED_list,
+            sem_current_LED_list,
         )
