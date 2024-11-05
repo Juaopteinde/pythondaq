@@ -21,7 +21,6 @@ class ArduinoVisaDevice:
     # Return identification string of the device connected to the given port
     def get_identification(self):
         identification = self.device.query("*IDN?")
-        print("lmao")
         return identification
 
     # Set voltage on channel 0, in ADC values (0 - 1023)

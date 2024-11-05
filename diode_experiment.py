@@ -14,11 +14,13 @@ class DiodeExperiment:
         # Create lists to store measurements
         voltages_scan_LED = []
         currents_scan_LED = []
+        sigma_voltage_LED_list = []
+        sigma_current_LED_list = []
 
         # Perform the measurements
         for voltage in range(start, stop + 1):
             self.arduino.set_output_value(value=voltage)
-
+            print(self.arduino.get_input_value(channel=1))
             voltage_LED_list = []
             current_LED_list = []
 
@@ -33,9 +35,24 @@ class DiodeExperiment:
                 voltage_LED_list.append(voltage_LED)
                 current_LED_list.append(current)
 
-            print(voltage_LED_list)
             mean_voltage_LED = sum(voltage_LED_list) / repeats
             mean_current_LED = sum(current_LED_list) / repeats
+
+            # Calculate error for voltage
+            squared_difference_value_and_mean = 0
+            for value in voltage_LED_list:
+                squared_difference_value_and_mean += (value - mean_voltage_LED) ** 2
+
+            sigma_voltage_LED = (squared_difference_value_and_mean / repeats) ** 0.5
+            sigma_voltage_LED_list.append(sigma_voltage_LED)
+
+            # Calculate error for current
+            squared_difference_value_and_mean = 0
+            for value in current_LED_list:
+                squared_difference_value_and_mean += (value - mean_current_LED) ** 2
+
+            sigma_current_LED = (squared_difference_value_and_mean / repeats) ** 0.5
+            sigma_current_LED_list.append(sigma_current_LED)
 
             print(f"Voltage over the LED is {round(mean_voltage_LED, 3)} V")
             print(f"Current through the LED is {round(mean_current_LED, 6)} A")
@@ -46,4 +63,16 @@ class DiodeExperiment:
         # Turn off lamp after scan
         self.arduino.set_output_value(value=0)
 
-        return voltages_scan_LED, currents_scan_LED
+        mean_sigma_voltage_LED = sum(sigma_voltage_LED_list) / len(
+            sigma_voltage_LED_list
+        )
+        mean_sigma_current_LED = sum(sigma_current_LED_list) / len(
+            sigma_current_LED_list
+        )
+
+        return (
+            voltages_scan_LED,
+            currents_scan_LED,
+            mean_sigma_voltage_LED,
+            mean_sigma_current_LED,
+        )

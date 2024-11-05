@@ -7,10 +7,20 @@ port = "ASRL4::INSTR"
 
 # Run measurements and save the data
 measurement = DiodeExperiment(port)
-voltages_LED, currents_LED = measurement.scan(0, 1023, 5)
+voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED = measurement.scan(
+    0, 1023, 5
+)
 
+print(errors_currents_LED)
 # Plot the data
-plt.plot(voltages_LED, currents_LED, "o")
+plt.errorbar(
+    voltages_LED,
+    currents_LED,
+    xerr=errors_voltages_LED,
+    yerr=errors_currents_LED,
+    ecolor="red",
+    fmt="o",
+)
 plt.title("I-U diagram of LED")
 plt.xlabel("Voltage U (V)")
 plt.ylabel("Current I (Amp)")
