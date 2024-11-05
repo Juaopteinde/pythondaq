@@ -11,7 +11,6 @@ voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED = measureme
     0, 1023, 3
 )
 
-print(errors_currents_LED)
 # Plot the data
 plt.errorbar(
     voltages_LED,

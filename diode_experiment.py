@@ -29,6 +29,7 @@ class DiodeExperiment:
             voltage_LED_list = []
             current_LED_list = []
 
+            # Perform repeated measurements for the same voltage
             for repeat in range(0, repeats):
                 voltage_resistor = float(self.arduino.get_input_voltage(channel=2))
                 current = voltage_resistor / 220
