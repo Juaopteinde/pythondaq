@@ -26,6 +26,9 @@ class DiodeExperiment:
                 float(self.arduino.get_input_voltage(channel=1)) - voltage_resistor
             )
 
+            print(f"Voltage over the LED is {voltage_LED} V")
+            print(f"Current through the LED is {current} A")
+
             voltages_scan_LED.append(voltage_LED)
             Currents_scan_LED.append(current)
 
