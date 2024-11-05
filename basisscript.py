@@ -3,14 +3,17 @@ import os
 
 import matplotlib.pyplot as plt
 import pyvisa
+
 from arduino_device import ArduinoVisaDevice, list_resources
 
 # Get available ports
 list_resources()
 
 # Call on the class using the right port
-port = xxx
+port = "ASRL4::INSTR"
 arduino = ArduinoVisaDevice(port)
+
+print(arduino.get_identification())
 
 # Create lists for the voltage and current through the LED
 U_list_LED = []
@@ -23,8 +26,8 @@ for voltage in range(0, 1024):
     arduino.set_output_value(value=voltage)
 
     # Measure voltages over resistor & LED
-    voltage_resistor = int(arduino.get_input_voltage(channel=2))
-    voltage_LED = int(arduino.get_input_voltage(channel=1)) - int(
+    voltage_resistor = float(arduino.get_input_voltage(channel=2))
+    voltage_LED = float(arduino.get_input_voltage(channel=1)) - float(
         arduino.get_input_voltage(channel=2)
     )
 

@@ -10,13 +10,15 @@ class ArduinoVisaDevice:
 
     # Define the device used by the rest of the class
     def __init__(self, port):
+        rm = pyvisa.ResourceManager("@py")
         self.device = rm.open_resource(
-            f"{port}", read_termination="\r\n", write_termination="\n"
+            port, read_termination="\r\n", write_termination="\n"
         )
 
     # Return identification string of the device connected to the given port
     def get_identification(self):
-        identification = self.device.quert("*IDN?")
+        identification = self.device.query("*IDN?")
+        print("lmao")
         return identification
 
     # Set voltage on channel 0, in ADC values (0 - 1023)
@@ -37,5 +39,5 @@ class ArduinoVisaDevice:
     # Read and return the voltage on the given channel, in voltage (0 - 3.3 V)
     def get_input_voltage(self, channel):
         step = 3.3 / 1023
-        input_voltage = (int(self.device.query(f"MEAS:CH{channel}?"))) * step
+        input_voltage = (float(self.device.query(f"MEAS:CH{channel}?"))) * step
         return input_voltage
