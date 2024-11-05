@@ -8,7 +8,7 @@ port = "ASRL4::INSTR"
 # Run measurements and save the data
 measurement = DiodeExperiment(port)
 voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED = measurement.scan(
-    0, 1023, 3
+    0, 1023, 3  # start stop repeats
 )
 
 # Plot the data
