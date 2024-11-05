@@ -42,7 +42,7 @@ class ArduinoVisaDevice:
     # Read and return the voltage on the given channel, in voltage (0 - 3.3 V)
     def get_input_voltage(self, channel):
         step = 3.3 / 1023
-        input_voltage = (float(self.device.query(f"MEAS:CH{channel}?"))) * step
+        input_voltage = (int(self.device.query(f"MEAS:CH{channel}?"))) * step
         return input_voltage
 
 

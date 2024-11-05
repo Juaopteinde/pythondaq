@@ -7,7 +7,7 @@ port = "ASRL4::INSTR"
 
 # Run measurements and save the data
 measurement = DiodeExperiment(port)
-voltages_LED, currents_LED = measurement.scan(0, 1024)
+voltages_LED, currents_LED = measurement.scan(0, 1023, 5)
 
 # Plot the data
 plt.plot(voltages_LED, currents_LED, "o")
