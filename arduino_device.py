@@ -1,11 +1,14 @@
 import pyvisa
 
 
+# Print list of connected ports
 def list_resources():
     rm = pyvisa.ResourceManager("@py")
     print(rm.list_resources())
 
 
+# Sends commands directly to arduino
+# Can set OUTPUT voltage, and read INPUT voltages
 class ArduinoVisaDevice:
 
     # Define the device used by the rest of the class
@@ -41,3 +44,8 @@ class ArduinoVisaDevice:
         step = 3.3 / 1023
         input_voltage = (float(self.device.query(f"MEAS:CH{channel}?"))) * step
         return input_voltage
+
+
+# Print list of connected ports when this script is run directly
+if __name__ == "__main__":
+    list_resources()
