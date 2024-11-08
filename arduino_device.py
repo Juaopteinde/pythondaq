@@ -26,7 +26,6 @@ class ArduinoVisaDevice:
     # Set voltage on channel 0, in ADC values (0 - 1023)
     def set_output_value(self, value):
         self.device.query(f"OUT:CH0 {value}")
-        print(f"Set ADC OUTPUT voltage on channel 0 to {value}")
 
     # Read and return the voltage on channel 0, in ADC values (0 - 1023)
     def get_output_value(self):
