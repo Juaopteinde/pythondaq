@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "pythondaq"
 version = "0.1.0"
-description = ""
+description = "Program to run an experiment on a LED through an arduino in order to get data about the U-I characteristics of the LED"
 authors = ["Juaopteinde <juaopteinde@Outlook.com>"]
 readme = "README.md"
 
