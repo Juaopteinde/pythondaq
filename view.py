@@ -9,17 +9,21 @@ from diode_experiment import DiodeExperiment
 port = "ASRL4::INSTR"
 
 
-# Exception for when given ADC value is out of range
 class OutOfRange:
+    """Exception for when ADC value is out ofrange."""
+
     pass
 
 
-# Exception for when starting value is higher than stopping value
 class InvalidRange:
+    """Exception for when starting value is higher than stopping value."""
+
     pass
 
 
 class WrongInput:
+    """Exception for when given input is invalid."""
+
     pass
 
 

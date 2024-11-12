@@ -4,14 +4,37 @@ from arduino_device import ArduinoVisaDevice
 
 
 class DiodeExperiment:
+    """Run voltage and current measurement on Arduino.
+
+    Attributes:
+    port (str): port connected to arduino
+
+    Methods:
+    scan(start, stop, repeats)
+    """
 
     # Initialize the arduino used by other methods
     def __init__(self, port):
+        """Open connection to arduino through class ArduinoVisaDevice.
+
+        Args:
+            port (str): port connected to arduino
+        """
         self.arduino = ArduinoVisaDevice(port)
 
     # Start a U, I, measurement of an LED by increasing U from start to stop
     # U is in ADC values (0 - 1023)
     def scan(self, start, stop, repeats):
+        """Run a U-I measurement on a LED by increasing the OUTPUT voltage and measuring INPUT voltage.
+
+        Args:
+            start (int): starting ADC voltage value
+            stop int): stopping ADC voltage value
+            repeats (int): amount of measurements per ADC voltage value
+
+        Returns:
+            list: measurement data, including measured voltage, current, and errors on voltage and current
+        """
 
         # Create lists to store measurements
         voltages_scan_LED = []

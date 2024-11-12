@@ -1,49 +1,89 @@
 import pyvisa
 
 
-# Print list of connected ports
 def list_resources():
     rm = pyvisa.ResourceManager("@py")
     print(rm.list_resources())
 
 
-# Sends commands directly to arduino
-# Can set OUTPUT voltage, and read INPUT voltages
 class ArduinoVisaDevice:
+    """Controls Arduino by sending direct commands.
 
-    # Define the device used by the rest of the class
+
+    Attributes:
+    port (str): port to which the arduino is connected
+
+
+    Methods:
+    get_identification()
+    set_output_value(value)
+    get_output_value()
+    get_input_value(channel)
+    get_input_voltage(channel)
+    """
+
     def __init__(self, port):
+        """Initialize the arduino.
+
+        Args:
+            port (str): port to which arduino is connected
+        """
         rm = pyvisa.ResourceManager("@py")
         self.device = rm.open_resource(
             port, read_termination="\r\n", write_termination="\n"
         )
 
-    # Return identification string of the device connected to the given port
     def get_identification(self):
+        """Identify the device connected to the port.
+
+        Returns:
+            str: identification string from connected device
+        """
         identification = self.device.query("*IDN?")
         return identification
 
-    # Set voltage on channel 0, in ADC values (0 - 1023)
     def set_output_value(self, value):
+        """Set ADC output value between 0 and 1023 on channel 0.
+
+        Args:
+            value (str): integer output voltage
+        """
         self.device.query(f"OUT:CH0 {value}")
 
-    # Read and return the voltage on channel 0, in ADC values (0 - 1023)
     def get_output_value(self):
+        """Read output value on channel 0.
+
+        Returns:
+            str: ADC value outputted on channel 0
+        """
         output_value = self.device.query("OUT:CH0?")
         return output_value
 
-    # Read and return the voltage on the given channel, in ADC values (0 - 1023)
     def get_input_value(self, channel):
+        """Measure inputted ADC value on given channel.
+
+        Args:
+            channel (str): channel you want to measure ADC voltage value on
+
+        Returns:
+            str: ADC value inputted on set channel
+        """
         input_value = self.device.query(f"MEAS:CH{channel}?")
         return input_value
 
-    # Read and return the voltage on the given channel, in voltage (0 - 3.3 V)
     def get_input_voltage(self, channel):
+        """Meausre inputted voltage on given channel.
+
+        Args:
+            channel (str): channel you want to measure voltage on
+
+        Returns:
+            str: voltage inputted on set channel
+        """
         step = 3.3 / 1023
         input_voltage = (int(self.device.query(f"MEAS:CH{channel}?"))) * step
         return input_voltage
 
 
-# Print list of connected ports when this script is run directly
 if __name__ == "__main__":
     list_resources()
