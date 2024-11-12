@@ -7,7 +7,7 @@ def list_resources():
 
 
 class ArduinoVisaDevice:
-    """Controls Arduino by sending direct commands.
+    """Controls Arduino by sending direct commands using VISA.
 
 
     Attributes:
@@ -23,7 +23,7 @@ class ArduinoVisaDevice:
     """
 
     def __init__(self, port):
-        """Initialize the arduino.
+        """Initialize the arduino and make it callable for the rest of the class.
 
         Args:
             port (str): port to which arduino is connected

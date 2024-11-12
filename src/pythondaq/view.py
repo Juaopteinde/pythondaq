@@ -9,25 +9,30 @@ from pythondaq.diode_experiment import DiodeExperiment
 port = "ASRL4::INSTR"
 
 
-class OutOfRange:
-    """Exception for when ADC value is out ofrange."""
-
-    pass
-
-
-class InvalidRange:
+class InvalidRange(Exception):
     """Exception for when starting value is higher than stopping value."""
 
     pass
 
 
-class WrongInput:
+class InvalidInput(Exception):
     """Exception for when given input is invalid."""
 
     pass
 
 
 def save_data(currents_LED, voltages_LED, errors_currents_LED, errors_voltages_LED):
+    """Save data from the measurement in a new .csv file.
+
+    Args:
+        currents_LED (list of float): Medians of measured currents (in Amps).
+        voltages_LED (list of float): Medians of measured voltages (in Volts).
+        errors_currents_LED (list of float): Standard errors of the currents.
+        errors_voltages_LED (list of float): Standard errors of the voltages.
+
+    Raises:
+        InvalidInput: If user input is not 'y' or 'n' when prompted to save data.
+    """
     # Ask if user wants to save the data in a .csv file
     while True:
         try:
@@ -37,9 +42,9 @@ def save_data(currents_LED, voltages_LED, errors_currents_LED, errors_voltages_L
             elif save_data == "n":
                 save_data = False
             else:
-                raise SyntaxError
+                raise InvalidInput
             break
-        except SyntaxError:
+        except InvalidInput:
             print("Give your answer as y or n. Please try again.")
 
     # Save the data in a .csv file if save_data == True
@@ -77,12 +82,23 @@ def save_data(currents_LED, voltages_LED, errors_currents_LED, errors_voltages_L
                         errors_voltages_LED,
                     ]
                 )
+        # Break out of the loop
         save_data = False
 
 
 # Ask user for starting value, stopping value, and amount of repeats per value.
 # Raise exceptions when given values are out of bounds.
 def take_inputs():
+    """Ask user for start and stop value for scan, also asks for amount of repeat measurements per ADC value.
+
+    Raises:
+        InvalidRange: If the starting value is greater than or equal to the stopping value.
+        InvalidInput: If the input values are outside the range of 0-1023 or repeat count is negative.
+        ValueError: If a non-integer value is entered.
+
+    Returns:
+        tuple: Three integers for the starting ADC value, stopping ADC value, and the number of repeats.
+    """
     while True:
         try:
             # Ask user for starting value
@@ -93,7 +109,9 @@ def take_inputs():
             )
 
             if start < 0 or start > 1023:
-                raise OutOfRange
+                raise InvalidRange(
+                    "The given stopping value was higher than the starting value. Please try again."
+                )
 
             # Ask user for stopping value
             stop = int(
@@ -103,37 +121,47 @@ def take_inputs():
             )
 
             if stop < 0 or stop > 1023:
-                raise OutOfRange
+                raise InvalidInput(
+                    "The given value is out the expected range. The range is 0 - 1023. Please try again."
+                )
 
             if stop < start:
-                raise InvalidRange
+                raise InvalidRange(
+                    "The given stopping value was higher than the starting value. Please try again."
+                )
 
             # Ask for amount of repeat measurements per ADC value
             repeats = int(
                 input("How many times do you want to repeat the measurement? \n")
             )
+
+            if repeats < 0:
+                raise InvalidInput(
+                    "Repeats have to be a positive integer. Please try again."
+                )
             break
 
         # Raise exception when given value is not integer
         except ValueError:
             print("All values should be integers. Please try again.")
+        except InvalidInput as e:
+            print(e)  # Print error message and loop will continue
+        except InvalidRange as e:
+            print(e)  # Print error message and loop will continue
 
-        # Raise exception when value is out of range
-        except OutOfRange:
-            print(
-                "The given value is out the expected range. The range is 0 - 1023. Please try again."
-            )
-
-        # Raise exception when start > stop
-        except InvalidRange:
-            print(
-                "The given stopping value was higher than the starting value. Please try again."
-            )
     return start, stop, repeats
 
 
 def plot_data(voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED):
-    # Plot the data
+    """Plots data from scan in diode_experiment.
+
+    Args:
+        voltages_LED (list of float): List of measured voltages (in Volts).
+        currents_LED (list of float): List of measured currents (in Amps).
+        errors_voltages_LED (list of float): List of voltage measurement errors.
+        errors_currents_LED (list of float): List of current measurement errors.
+    """
+
     plt.errorbar(
         voltages_LED,
         currents_LED,
@@ -150,7 +178,13 @@ def plot_data(voltages_LED, currents_LED, errors_voltages_LED, errors_currents_L
 
 
 def main():
+    """Runs a diode experiment, plots the data, and optionally saves it.
 
+    Collects user inputs for the scan, performs the diode experiment, plots the data,
+    and prompts the user to save the data in a .csv file.
+    """
+
+    # initialize parameters for take_inputs()
     start, stop, repeats = take_inputs()
 
     # Run measurements and save the data

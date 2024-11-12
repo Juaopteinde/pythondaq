@@ -4,7 +4,7 @@ from pythondaq.arduino_device import ArduinoVisaDevice
 
 
 class DiodeExperiment:
-    """Run voltage and current measurement on Arduino.
+    """Run an experiment on an LED to get voltage and current data of the LED.
 
     Attributes:
     port (str): port connected to arduino
@@ -23,7 +23,7 @@ class DiodeExperiment:
         self.arduino = ArduinoVisaDevice(port)
 
     def scan(self, start, stop, repeats):
-        """Run a U-I measurement on a LED by increasing the ADC OUTPUT voltage and measuring ADC INPUT voltage.
+        """Increase OUTPUT voltage on channel 0 from start to stop, measure INPUT voltage on channels 1 & 2, calculate voltages, currents, and errors for the LED.
 
         Args:
             start (int): starting ADC voltage value
