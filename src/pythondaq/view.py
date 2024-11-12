@@ -2,7 +2,8 @@ import csv
 import os
 
 import matplotlib.pyplot as plt
-from diode_experiment import DiodeExperiment
+
+from pythondaq.diode_experiment import DiodeExperiment
 
 # Define port connected to arduino
 port = "ASRL4::INSTR"
