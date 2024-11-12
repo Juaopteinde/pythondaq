@@ -22,10 +22,9 @@ class DiodeExperiment:
         """
         self.arduino = ArduinoVisaDevice(port)
 
-    # Start a U, I, measurement of an LED by increasing U from start to stop
-    # U is in ADC values (0 - 1023)
+
     def scan(self, start, stop, repeats):
-        """Run a U-I measurement on a LED by increasing the OUTPUT voltage and measuring INPUT voltage.
+        """Run a U-I measurement on a LED by increasing the ADC OUTPUT voltage and measuring ADC INPUT voltage.
 
         Args:
             start (int): starting ADC voltage value
