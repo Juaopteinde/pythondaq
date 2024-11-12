@@ -27,77 +27,7 @@ class WrongInput:
     pass
 
 
-def main():
-    # Ask user for starting value, stopping value, and amount of repeats per value.\
-    # Raise exceptions when given values are out of bounds.\
-    while True:
-        try:
-            # Ask user for starting value
-            start = int(
-                input(
-                    "Give the starting value for the scan, in ADC voltage between 0-1023 \n"
-                )
-            )
-
-            if start < 0 or start > 1023:
-                raise OutOfRange
-
-            # Ask user for stopping value
-            stop = int(
-                input(
-                    "Give the stopping value for the scan, in ADC voltage between 0-1023 \n"
-                )
-            )
-
-            if stop < 0 or stop > 1023:
-                raise OutOfRange
-
-            if stop < start:
-                raise InvalidRange
-
-            # Ask for amount of repeat measurements per ADC value
-            repeats = int(
-                input("How many times do you want to repeat the measurement? \n")
-            )
-            break
-
-        # Raise exception when given value is not integer
-        except ValueError:
-            print("All values should be integers. Please try again.")
-
-        # Raise exception when value is out of range
-        except OutOfRange:
-            print(
-                "The given value is out the expected range. The range is 0 - 1023. Please try again."
-            )
-
-        # Raise exception when start > stop
-        except InvalidRange:
-            print(
-                "The given stopping value was higher than the starting value. Please try again."
-            )
-
-    # Run measurements and save the data
-    measurement = DiodeExperiment(port)
-    voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED = (
-        measurement.scan(int(start), int(stop), repeats)  # start stop repeats
-    )
-
-    # Plot the data
-    plt.errorbar(
-        voltages_LED,
-        currents_LED,
-        xerr=errors_voltages_LED,
-        yerr=errors_currents_LED,
-        ecolor="red",
-        fmt="o",
-        markersize=4,
-    )
-    plt.title("I-U diagram of LED")
-    plt.xlabel("Voltage U (V)")
-    plt.ylabel("Current I (Amp)")
-    plt.show()
-
+def save_data(currents_LED, voltages_LED, errors_currents_LED, errors_voltages_LED):
     # Ask if user wants to save the data in a .csv file
     while True:
         try:
@@ -148,6 +78,90 @@ def main():
                     ]
                 )
         save_data = False
+
+
+# Ask user for starting value, stopping value, and amount of repeats per value.
+# Raise exceptions when given values are out of bounds.
+def take_inputs():
+    while True:
+        try:
+            # Ask user for starting value
+            start = int(
+                input(
+                    "Give the starting value for the scan, in ADC voltage between 0-1023 \n"
+                )
+            )
+
+            if start < 0 or start > 1023:
+                raise OutOfRange
+
+            # Ask user for stopping value
+            stop = int(
+                input(
+                    "Give the stopping value for the scan, in ADC voltage between 0-1023 \n"
+                )
+            )
+
+            if stop < 0 or stop > 1023:
+                raise OutOfRange
+
+            if stop < start:
+                raise InvalidRange
+
+            # Ask for amount of repeat measurements per ADC value
+            repeats = int(
+                input("How many times do you want to repeat the measurement? \n")
+            )
+            break
+
+        # Raise exception when given value is not integer
+        except ValueError:
+            print("All values should be integers. Please try again.")
+
+        # Raise exception when value is out of range
+        except OutOfRange:
+            print(
+                "The given value is out the expected range. The range is 0 - 1023. Please try again."
+            )
+
+        # Raise exception when start > stop
+        except InvalidRange:
+            print(
+                "The given stopping value was higher than the starting value. Please try again."
+            )
+    return start, stop, repeats
+
+
+def plot_data(voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED):
+    # Plot the data
+    plt.errorbar(
+        voltages_LED,
+        currents_LED,
+        xerr=errors_voltages_LED,
+        yerr=errors_currents_LED,
+        ecolor="red",
+        fmt="o",
+        markersize=4,
+    )
+    plt.title("I-U diagram of LED")
+    plt.xlabel("Voltage U (V)")
+    plt.ylabel("Current I (Amp)")
+    plt.show()
+
+
+def main():
+
+    start, stop, repeats = take_inputs()
+
+    # Run measurements and save the data
+    measurement = DiodeExperiment(port)
+    voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED = (
+        measurement.scan(int(start), int(stop), repeats)  # start stop repeats
+    )
+
+    plot_data(voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED)
+
+    save_data(currents_LED, voltages_LED, errors_currents_LED, errors_voltages_LED)
 
 
 if __name__ == "__main__":
