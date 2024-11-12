@@ -2,7 +2,6 @@ import csv
 import os
 
 import matplotlib.pyplot as plt
-
 from diode_experiment import DiodeExperiment
 
 # Define port connected to arduino
@@ -107,8 +106,8 @@ while save_data:
     filename = "metingen_0.csv"
     counter = 0
     while filename in entries:
-        filename = f"metingen_{counter}.csv"
         counter += 1
+        filename = f"metingen_{counter}.csv"
 
     # Create file with the new filename
     with open(f"{filename}", "w", newline="") as csvfile:
@@ -120,6 +119,7 @@ while save_data:
             writer.writerow(
                 [currents_LED, voltages_LED, errors_currents_LED, errors_voltages_LED]
             )
+    save_data = False
 
 # Plot the data
 plt.errorbar(

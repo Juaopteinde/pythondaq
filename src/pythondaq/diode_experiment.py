@@ -1,5 +1,4 @@
 import numpy as np
-
 from arduino_device import ArduinoVisaDevice
 
 
@@ -21,7 +20,6 @@ class DiodeExperiment:
             port (str): port connected to arduino
         """
         self.arduino = ArduinoVisaDevice(port)
-
 
     def scan(self, start, stop, repeats):
         """Run a U-I measurement on a LED by increasing the ADC OUTPUT voltage and measuring ADC INPUT voltage.
@@ -71,8 +69,8 @@ class DiodeExperiment:
             mean_voltage_LED = np.mean(voltage_LED_array)
             mean_current_LED = np.mean(current_LED_array)
 
-            voltages_scan_LED.append(mean_voltage_LED)
-            currents_scan_LED.append(mean_current_LED)
+            voltages_scan_LED.append(float(mean_voltage_LED))
+            currents_scan_LED.append(float(mean_current_LED))
 
             # Calculate standarddeviation of repeated measurement
             sigma_voltage_LED = np.std(voltage_LED_array)
@@ -82,8 +80,8 @@ class DiodeExperiment:
             sem_voltage_LED = sigma_voltage_LED / np.sqrt(repeats)
             sem_current_LED = sigma_current_LED / np.sqrt(repeats)
 
-            sem_voltage_LED_list.append(sem_voltage_LED)
-            sem_current_LED_list.append(sem_current_LED)
+            sem_voltage_LED_list.append(float(sem_voltage_LED))
+            sem_current_LED_list.append(float(sem_current_LED))
 
         # Turn off lamp after scan
         self.arduino.set_output_value(value=0)
