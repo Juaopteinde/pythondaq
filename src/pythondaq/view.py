@@ -27,7 +27,7 @@ class WrongInput:
     pass
 
 
-def scan():
+def main():
     # Ask user for starting value, stopping value, and amount of repeats per value.\
     # Raise exceptions when given values are out of bounds.\
     while True:
@@ -77,6 +77,27 @@ def scan():
                 "The given stopping value was higher than the starting value. Please try again."
             )
 
+    # Run measurements and save the data
+    measurement = DiodeExperiment(port)
+    voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED = (
+        measurement.scan(int(start), int(stop), repeats)  # start stop repeats
+    )
+
+    # Plot the data
+    plt.errorbar(
+        voltages_LED,
+        currents_LED,
+        xerr=errors_voltages_LED,
+        yerr=errors_currents_LED,
+        ecolor="red",
+        fmt="o",
+        markersize=4,
+    )
+    plt.title("I-U diagram of LED")
+    plt.xlabel("Voltage U (V)")
+    plt.ylabel("Current I (Amp)")
+    plt.show()
+
     # Ask if user wants to save the data in a .csv file
     while True:
         try:
@@ -90,12 +111,6 @@ def scan():
             break
         except SyntaxError:
             print("Give your answer as y or n. Please try again.")
-
-    # Run measurements and save the data
-    measurement = DiodeExperiment(port)
-    voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED = (
-        measurement.scan(int(start), int(stop), 3)  # start stop repeats
-    )
 
     # Save the data in a .csv file if save_data == True
     # Does currently not work sadly
@@ -134,21 +149,6 @@ def scan():
                 )
         save_data = False
 
-    # Plot the data
-    plt.errorbar(
-        voltages_LED,
-        currents_LED,
-        xerr=errors_voltages_LED,
-        yerr=errors_currents_LED,
-        ecolor="red",
-        fmt="o",
-        markersize=4,
-    )
-    plt.title("I-U diagram of LED")
-    plt.xlabel("Voltage U (V)")
-    plt.ylabel("Current I (Amp)")
-    plt.show()
-
 
 if __name__ == "__main__":
-    scan()
+    main()

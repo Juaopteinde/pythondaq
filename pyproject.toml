@@ -20,4 +20,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 naam_commando = "package.module:naam_functie"
-view = "pythondaq.view:"
+view = "pythondaq.view:main"
