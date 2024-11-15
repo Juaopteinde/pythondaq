@@ -12,6 +12,7 @@ numpy = "^2.1.3"
 pyvisa = "^1.14.1"
 pyvisa-py = "^0.7.2"
 pyserial = "^3.5"
+click = "^8.1.7"
 
 
 [build-system]
@@ -19,5 +20,6 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
-naam_commando = "package.module:naam_functie"
 view = "pythondaq.view:main"
+list = "pythondaq.cli:view_list"
+scan = "pythondaq.cli:view_scan"

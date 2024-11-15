@@ -36,7 +36,9 @@ def save_data(currents_LED, voltages_LED, errors_currents_LED, errors_voltages_L
     # Ask if user wants to save the data in a .csv file
     while True:
         try:
-            save_data = input("Do you want to save the data in a .csv file? (y/n) \n")
+            save_data = input(
+                "Do you want to save the data in a .csv file? (y/n) \n Make sure you checked if filepath is set right! \n"
+            )
             if save_data == "y":
                 save_data = True
             elif save_data == "n":
@@ -47,42 +49,41 @@ def save_data(currents_LED, voltages_LED, errors_currents_LED, errors_voltages_L
         except InvalidInput:
             print("Give your answer as y or n. Please try again.")
 
-    # Save the data in a .csv file if save_data == True
-    # Does currently not work sadly
     while save_data:
+        # Explicitly set the directory
+        directory = "C:/Users/groepA/OneDrive - UvA/Pyhton repo/Jaar 2/ECPC/pythondaq"
 
-        # Create a list of all files in the current directory
-        current_directory = os.getcwd()
-        entries = os.listdir(current_directory)
+        # Make sure the directory exists
+        if not os.path.exists(directory):
+            print(f"Directory {directory} does not exist. Please check the path.")
+            break
 
-        # Check if the current filename already exists in the current directory, if not create a new filename
+        entries = os.listdir(directory)
+
+        # Check if the current filename already exists in the specified directory
         filename = "metingen_0.csv"
         counter = 0
         while filename in entries:
             counter += 1
             filename = f"metingen_{counter}.csv"
 
+        filepath = os.path.join(directory, filename)
+
         # Create file with the new filename
-        with open(f"{filename}", "w", newline="") as csvfile:
+        with open(filepath, "w", newline="") as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(["I", "U", "SEM_I", "SEM_U"])
             for (
-                currents_LED,
-                voltages_LED,
-                errors_currents_LED,
-                errors_voltages_LED,
+                current,
+                voltage,
+                error_current,
+                error_voltage,
             ) in zip(
                 currents_LED, voltages_LED, errors_currents_LED, errors_voltages_LED
             ):
-                writer.writerow(
-                    [
-                        currents_LED,
-                        voltages_LED,
-                        errors_currents_LED,
-                        errors_voltages_LED,
-                    ]
-                )
-        # Break out of the loop
+                writer.writerow([current, voltage, error_current, error_voltage])
+
+        print(f"Data saved successfully to {filepath}")
         save_data = False
 
 
