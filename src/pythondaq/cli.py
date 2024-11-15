@@ -1,6 +1,79 @@
+import csv
+import os
+
 import click
+import matplotlib.pyplot as plt
 
 from pythondaq.diode_experiment import DiodeExperiment
+
+
+def plot_data(voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED):
+    """Plots data from scan in diode_experiment.
+
+    Args:
+        voltages_LED (list of float): List of measured voltages (in Volts).
+        currents_LED (list of float): List of measured currents (in Amps).
+        errors_voltages_LED (list of float): List of voltage measurement errors.
+        errors_currents_LED (list of float): List of current measurement errors.
+    """
+
+    plt.errorbar(
+        voltages_LED,
+        currents_LED,
+        xerr=errors_voltages_LED,
+        yerr=errors_currents_LED,
+        ecolor="red",
+        fmt="o",
+        markersize=4,
+    )
+    plt.title("I-U diagram of LED")
+    plt.xlabel("Voltage U (V)")
+    plt.ylabel("Current I (Amp)")
+    plt.show()
+
+
+def save_data(
+    currents_LED, voltages_LED, errors_currents_LED, errors_voltages_LED, filename
+):
+    """Save data from the measurement in a new .csv file.
+
+    Args:
+        currents_LED (list of float): Medians of measured currents (in Amps).
+        voltages_LED (list of float): Medians of measured voltages (in Volts).
+        errors_currents_LED (list of float): Standard errors of the currents.
+        errors_voltages_LED (list of float): Standard errors of the voltages.
+
+    Raises:
+        InvalidInput: If user input is not 'y' or 'n' when prompted to save data.
+    """
+
+    # Explicitly set the directory
+    directory = "C:/Users/groepA/OneDrive - UvA/Pyhton repo/Jaar 2/ECPC/pythondaq"
+
+    entries = os.listdir(directory)
+
+    # Check if the current filename already exists in the specified directory
+    filename = f"{filename}.csv"
+    counter = 1
+    while filename in entries:
+        filename = f"{filename}({counter})"
+        counter += 1
+
+    filepath = os.path.join(directory, filename)
+
+    # Create file with the new filename
+    with open(f"{filepath}", "w", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["I (A)", "U (V)", "SEM_I (A)", "SEM_U (V)"])
+        for (
+            current,
+            voltage,
+            error_current,
+            error_voltage,
+        ) in zip(currents_LED, voltages_LED, errors_currents_LED, errors_voltages_LED):
+            writer.writerow([current, voltage, error_current, error_voltage])
+
+    print(f"Data saved successfully to {filepath}")
 
 
 @click.group()
@@ -18,7 +91,8 @@ def view_list():
 @click.option("-s", "-start", "--starting_voltage", default=0.0)
 @click.option("-e", "-end", "-stop", "--stopping_voltage", default=3.3)
 @click.option("-r", "--repeats", default=3)
-def view_scan(port, starting_voltage, stopping_voltage, repeats):
+@click.option("-f", "-o", "--output", type=str, required=False)
+def view_scan(port, starting_voltage, stopping_voltage, repeats, output):
 
     V_to_ADC_step = 1023 / 3.3
     starting_value = int(starting_voltage * V_to_ADC_step)
@@ -28,8 +102,15 @@ def view_scan(port, starting_voltage, stopping_voltage, repeats):
     voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED = (
         LED_scan.scan(starting_value, stopping_value, repeats)
     )
-    print(voltages_LED, currents_LED)
+    plot_data(voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED)
+    if output:
+        save_data(
+            currents_LED, voltages_LED, errors_currents_LED, errors_voltages_LED, output
+        )
 
 
 if __name__ == "__main__":
+    view_group()
+    view_group()
+    view_group()
     view_group()
