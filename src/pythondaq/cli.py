@@ -38,9 +38,15 @@ def save_data(
     errors_currents_LED,
     errors_voltages_LED,
     filename,
-    current_directory,
+    output_directory,
 ):
     """Save scan data into a new .csv file in a set or current directory.
+    \n
+
+    Savedata directory priority:
+        (1) output_directory
+        (2) current directory
+
 
     Args:
         currents_LED (list of float): medians of measured currents (in Amps)
@@ -48,17 +54,20 @@ def save_data(
         errors_currents_LED (list of float): standard errors of the currents
         errors_voltages_LED (list of float): standard errors of the voltages
         filename (str): name for the .csv file containing scan data
-        current_directory (bool): boolean to toggle saving into a set or current directory
+        output_directory (str): directory to save .csv file in
+
     """
-    # If current_directory == True, save file in current directory
-    if current_directory:
-        directory = os.getcwd()
-    # If current_directory == False, save file in chosen directory
-    # make sure you use "/" instead of "\"
+
+    # Save data only if filename is given
+    if output_directory:
+        # Set directory to given directory, or to current if no directory is given
+        directory = os.path.normpath(output_directory)
+        if not os.path.isdir(directory):
+            raise ValueError(
+                f"The specified output directory does not exist: {directory}"
+            )
     else:
-        directory = (
-            "C:/Users/groepA/OneDrive - UvA/Pyhton repo/Jaar 2/ECPC/pythondaq/metingen"
-        )
+        directory = os.getcwd()
 
     # Check if the current filename already exists in the specified directory
     # If so, iterate the filename to filename(1), filename(2), etc.
@@ -126,7 +135,6 @@ def view_list():
     help="Amount of measurements to run per ADC voltage value of the scan.",
 )
 @click.option(
-    "-f",
     "-o",
     "--output",
     type=str,
@@ -134,25 +142,35 @@ def view_list():
     help="Store data into .csv file with given filename. Will not store data if not given.",
 )
 @click.option(
-    "-cd",
-    "--current_directory",
-    is_flag=True,
-    default=False,
-    help="Store data into current directory. Will store data into directory set in code if not given.",
+    "-od",
+    "--output-directory",
+    type=str,
+    required=False,
+    help="Give directory you want to save data in. If not given, will store data into directory set in code or current directory if -cd is given.",
 )
 def view_scan(
-    port, starting_voltage, stopping_voltage, repeats, output, current_directory
+    port,
+    starting_voltage,
+    stopping_voltage,
+    repeats,
+    output,
+    output_directory,
 ):
-    """Start a LED scan in given range with given amount of repeats. Plot and optionally save the data.
+    """Start a LED scan in a given voltage range. Plot and optionally save the data.
+    \n
+    \b
+    Savedata directory priority:
+        (1) output_directory
+        (2) current directory
 
     \b
     Args:
         port (str): port connected to Arduino
-        starting_voltage (float): voltage value in Volt to start scan from
-        stopping_voltage (float): voltage value in Volt to stop scan at
+        starting_voltage (float): starting voltage of scan
+        stopping_voltage (float): stopping voltage of scan
         repeats (int): amount of times each measurement is repeated
-        output (str): filename for saved scan data
-        current_directory (bool): toggle to store data into current or set directory
+        output (str): filename for savefile of data
+        output_directory (str): directory into which data is stored, if not given, store in current directory
     """
 
     # Change voltage in Volt to ADC value
@@ -177,9 +195,9 @@ def view_scan(
             errors_currents_LED,
             errors_voltages_LED,
             output,
-            current_directory,
+            output_directory,
         )
 
 
 if __name__ == "__main__":
-    view_group()
+    view_scan()
