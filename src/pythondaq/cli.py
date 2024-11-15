@@ -33,7 +33,12 @@ def plot_data(voltages_LED, currents_LED, errors_voltages_LED, errors_currents_L
 
 
 def save_data(
-    currents_LED, voltages_LED, errors_currents_LED, errors_voltages_LED, filename
+    currents_LED,
+    voltages_LED,
+    errors_currents_LED,
+    errors_voltages_LED,
+    filename,
+    current_directory,
 ):
     """Save data from the measurement in a new .csv file.
 
@@ -48,21 +53,28 @@ def save_data(
     """
 
     # Explicitly set the directory
-    directory = "C:/Users/groepA/OneDrive - UvA/Pyhton repo/Jaar 2/ECPC/pythondaq"
+    if current_directory:
+        directory = os.getcwd()
+    else:
+        directory = (
+            "C:/Users/groepA/OneDrive - UvA/Pyhton repo/Jaar 2/ECPC/pythondaq/metingen"
+        )
 
     entries = os.listdir(directory)
+    print(entries)
 
     # Check if the current filename already exists in the specified directory
-    filename = f"{filename}.csv"
-    counter = 1
-    while filename in entries:
-        filename = f"{filename}({counter})"
-        counter += 1
+    original_filename = filename
+    if f"{original_filename}.csv" in entries:
+        counter = 0
+        while f"{filename}.csv" in entries:
+            counter += 1
+            filename = f"{original_filename}({counter})"
 
     filepath = os.path.join(directory, filename)
 
     # Create file with the new filename
-    with open(f"{filepath}", "w", newline="") as csvfile:
+    with open(f"{filepath}.csv", "w", newline="") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["I (A)", "U (V)", "SEM_I (A)", "SEM_U (V)"])
         for (
@@ -92,7 +104,10 @@ def view_list():
 @click.option("-e", "-end", "-stop", "--stopping_voltage", default=3.3)
 @click.option("-r", "--repeats", default=3)
 @click.option("-f", "-o", "--output", type=str, required=False)
-def view_scan(port, starting_voltage, stopping_voltage, repeats, output):
+@click.option("-cd", "--current_directory", is_flag=True, default=False)
+def view_scan(
+    port, starting_voltage, stopping_voltage, repeats, output, current_directory
+):
 
     V_to_ADC_step = 1023 / 3.3
     starting_value = int(starting_voltage * V_to_ADC_step)
@@ -102,10 +117,15 @@ def view_scan(port, starting_voltage, stopping_voltage, repeats, output):
     voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED = (
         LED_scan.scan(starting_value, stopping_value, repeats)
     )
-    plot_data(voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED)
+    # plot_data(voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED)
     if output:
         save_data(
-            currents_LED, voltages_LED, errors_currents_LED, errors_voltages_LED, output
+            currents_LED,
+            voltages_LED,
+            errors_currents_LED,
+            errors_voltages_LED,
+            output,
+            current_directory,
         )
 
 
