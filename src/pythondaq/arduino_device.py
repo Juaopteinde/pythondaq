@@ -3,7 +3,8 @@ import pyvisa
 
 def list_resources():
     rm = pyvisa.ResourceManager("@py")
-    print(rm.list_resources())
+    connected_ports = rm.list_resources()
+    return connected_ports
 
 
 class ArduinoVisaDevice:

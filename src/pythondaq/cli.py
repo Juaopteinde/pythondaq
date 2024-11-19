@@ -4,7 +4,14 @@ import os
 import click
 import matplotlib.pyplot as plt
 
+from pythondaq.arduino_device import ArduinoVisaDevice, list_resources
 from pythondaq.diode_experiment import DiodeExperiment
+
+
+class SearchError(Exception):
+    """Exception for when search str does not yield a single device."""
+
+    pass
 
 
 def plot_data(voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED):
@@ -80,7 +87,7 @@ def save_data(
             counter += 1
             filename = f"{original_filename}({counter})"
 
-    # Save scan data into new file
+    # Write scan data into .csv file located at filepath
     filepath = os.path.join(directory, filename)
 
     with open(f"{filepath}.csv", "w", newline="") as csvfile:
@@ -97,22 +104,67 @@ def save_data(
     print(f"Data saved successfully to {filepath}")
 
 
-# Create group of commands for view
+# Create group of commands for diode
 @click.group()
-def view_group():
+def diode():
     pass
 
 
-@view_group.command("list")
-def view_list():
-    print("Work in progress, list devices")
+@diode.command("info")
+@click.argument("search")
+def info(search):
+    """Retreive and print identification string of connected device.
+
+    Args:
+        search (str): string to look for in list of connected devices
+
+    Raises:
+        SearchError: if search string yields more than 1 device
+    """
+
+    connected_ports = list_resources()
+    devices_list = []
+    for device in connected_ports:
+        if search in device:
+            devices_list.append(device)
+
+    if len(devices_list) > 1:
+        raise SearchError(
+            f"Search str must only return 1 device in diode list, not {len(devices_list)}"
+        )
+
+    arduino_device = ArduinoVisaDevice(devices_list[0])
+    identificaion = arduino_device.get_identification()
+
+    print(identificaion)
+
+
+@diode.command("list")
+@click.option("-s", "--search", required=False)
+def view_list(search):
+    """_summary_
+
+    Args:
+        search (_type_): _description_
+    """
+    connected_ports = list_resources()
+    if search:
+        search_devices = []
+        for device in connected_ports:
+            if search in device:
+                search_devices.append(device)
+        print("The devices that match your search string:\n")
+        for device in search_devices:
+            print(device)
+    else:
+        print("The device connected to your computer:\n")
+        for port in connected_ports:
+            print(port)
 
 
 # Command to start LED scan
-@view_group.command("scan")
-@click.option(
-    "-p", "--port", default="ASRL4::INSTR", help="Port to which Arduino is connected."
-)
+@diode.command("scan")
+@click.argument("port")
 @click.option(
     "-s",
     "-start",
@@ -148,6 +200,13 @@ def view_list():
     required=False,
     help="Give directory you want to save data in. If not given, will store data into directory set in code or current directory if -cd is given.",
 )
+@click.option(
+    "-g",
+    "--graph",
+    is_flag=True,
+    default=False,
+    help="Graph the data if graph function is given.",
+)
 def view_scan(
     port,
     starting_voltage,
@@ -155,6 +214,7 @@ def view_scan(
     repeats,
     output,
     output_directory,
+    graph,
 ):
     """Start a LED scan in a given voltage range. Plot and optionally save the data.
     \n
@@ -171,6 +231,7 @@ def view_scan(
         repeats (int): amount of times each measurement is repeated
         output (str): filename for savefile of data
         output_directory (str): directory into which data is stored, if not given, store in current directory
+        graph (bool): graph data only if graph option is given
     """
 
     # Change voltage in Volt to ADC value
@@ -178,14 +239,27 @@ def view_scan(
     starting_value = int(starting_voltage * V_to_ADC_step)
     stopping_value = int(stopping_voltage * V_to_ADC_step)
 
+    connected_ports = list_resources()
+    devices_list = []
+    for device in connected_ports:
+        if port in device:
+            devices_list.append(device)
+    if len(devices_list) > 1:
+        raise SearchError(
+            f"Search str must only return 1 device in diode list, not {len(devices_list)}"
+        )
+
     # Run the scan in diode_experiment.py
     LED_scan = DiodeExperiment(port)
     voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED = (
         LED_scan.scan(starting_value, stopping_value, repeats)
     )
 
-    # Plot the data
-    plot_data(voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED)
+    print(voltages_LED, currents_LED)
+
+    # Plot only if user wants to
+    if graph:
+        plot_data(voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED)
 
     # Save the data if a filename is given
     if output:
@@ -200,4 +274,4 @@ def view_scan(
 
 
 if __name__ == "__main__":
-    view_scan()
+    diode()
