@@ -3,6 +3,8 @@ import os
 
 import click
 import matplotlib.pyplot as plt
+import numpy as np
+from lmfit import Model
 
 from pythondaq.arduino_device import ArduinoVisaDevice, list_resources
 from pythondaq.diode_experiment import DiodeExperiment
@@ -205,7 +207,13 @@ def view_list(search):
     "--graph",
     is_flag=True,
     default=False,
-    help="Graph the data if graph function is given.",
+    help="Toggle graphing the data.",
+)
+@click.option(
+    "--shockley",
+    is_flag=True,
+    default=False,
+    help="Toggle fitting the data to shockley formula.",
 )
 def view_scan(
     port,
@@ -215,6 +223,7 @@ def view_scan(
     output,
     output_directory,
     graph,
+    shockley,
 ):
     """Start a LED scan in a given voltage range. Plot and optionally save the data.
     \n
@@ -231,7 +240,8 @@ def view_scan(
         repeats (int): amount of times each measurement is repeated
         output (str): filename for savefile of data
         output_directory (str): directory into which data is stored, if not given, store in current directory
-        graph (bool): graph data only if graph option is given
+        graph (bool): toggle to graph data
+        shockley (bool): toggle to fit data to shockley formula
 
     Raises:
         SearchError: if provided search string does not yield a single connected device.
@@ -274,6 +284,23 @@ def view_scan(
             output,
             output_directory,
         )
+
+    # Fit data to shockley formula
+    if shockley:
+
+        def shockley(V_d, I_s, n, V_t):
+            print(I_s * (np.exp((V_d) / (n * V_t) - 1)))
+            return I_s * (np.exp((V_d) / (n * V_t)) - 1)
+
+        smodel = Model(shockley)
+
+        result = smodel.fit(currents_LED, V_d=voltages_LED, n=1.5, I_s=1e-9, V_t=1)
+
+        print(result.fit_report())
+        V_t_fitted = result.params["V_t"].value
+
+        k = (V_t_fitted * 1.602e-19) / 300
+        print(f"Boltzmann constant = {k}")
 
 
 if __name__ == "__main__":

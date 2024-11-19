@@ -1,4 +1,5 @@
 import numpy as np
+from rich.progress import track
 
 from pythondaq.arduino_device import ArduinoVisaDevice
 
@@ -42,7 +43,7 @@ class DiodeExperiment:
 
         # Perform the measurements
         print("Starting scan")
-        for voltage in range(start, stop + 1):
+        for voltage in track(range(start, stop + 1), description="[cyan]Scanning..."):
 
             # Set OUTPUT voltage
             self.arduino.set_output_value(value=voltage)
