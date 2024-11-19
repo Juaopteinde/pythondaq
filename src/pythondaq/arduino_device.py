@@ -2,6 +2,11 @@ import pyvisa
 
 
 def list_resources():
+    """Retrieves and returns a list of connected resources.
+
+    Returns:
+        list: contains connected resources
+    """
     rm = pyvisa.ResourceManager("@py")
     connected_ports = rm.list_resources()
     return connected_ports

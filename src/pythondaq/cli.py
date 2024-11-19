@@ -119,7 +119,7 @@ def info(search):
         search (str): string to look for in list of connected devices
 
     Raises:
-        SearchError: if search string yields more than 1 device
+        SearchError: if search string does not yield a single device
     """
 
     connected_ports = list_resources()
@@ -128,7 +128,7 @@ def info(search):
         if search in device:
             devices_list.append(device)
 
-    if len(devices_list) > 1:
+    if len(devices_list) > 1 or len(devices_list) == 0:
         raise SearchError(
             f"Search str must only return 1 device in diode list, not {len(devices_list)}"
         )
@@ -142,10 +142,10 @@ def info(search):
 @diode.command("list")
 @click.option("-s", "--search", required=False)
 def view_list(search):
-    """_summary_
+    """Retreive and print list of connected devices.
 
     Args:
-        search (_type_): _description_
+        search (str): string to look for in list of connected devices
     """
     connected_ports = list_resources()
     if search:
@@ -220,8 +220,8 @@ def view_scan(
     \n
     \b
     Savedata directory priority:
-        (1) output_directory
-        (2) current directory
+        (1) If output_directory correctly provided, savedata goes there.
+        (2) If output_directoy not provided, savedata goes to current directory.
 
     \b
     Args:
@@ -232,6 +232,9 @@ def view_scan(
         output (str): filename for savefile of data
         output_directory (str): directory into which data is stored, if not given, store in current directory
         graph (bool): graph data only if graph option is given
+
+    Raises:
+        SearchError: if provided search string does not yield a single connected device.
     """
 
     # Change voltage in Volt to ADC value
@@ -244,7 +247,7 @@ def view_scan(
     for device in connected_ports:
         if port in device:
             devices_list.append(device)
-    if len(devices_list) > 1:
+    if len(devices_list) > 1 or len(devices_list) == 0:
         raise SearchError(
             f"Search str must only return 1 device in diode list, not {len(devices_list)}"
         )
