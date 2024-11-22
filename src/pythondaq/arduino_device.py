@@ -93,5 +93,3 @@ class ArduinoVisaDevice:
 
 if __name__ == "__main__":
     list_resources()
-
-print(help(ArduinoVisaDevice))
