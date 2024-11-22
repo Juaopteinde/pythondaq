@@ -78,7 +78,7 @@ class ArduinoVisaDevice:
         return input_value
 
     def get_input_voltage(self, channel):
-        """Meausre inputted voltage on given channel.
+        """Measure inputted voltage on given channel.
 
         Args:
             channel (str): channel you want to measure voltage on
@@ -93,3 +93,5 @@ class ArduinoVisaDevice:
 
 if __name__ == "__main__":
     list_resources()
+
+print(help(ArduinoVisaDevice))

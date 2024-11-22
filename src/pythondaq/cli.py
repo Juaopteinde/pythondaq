@@ -108,6 +108,7 @@ def save_data(
 # Create group of commands for diode
 @click.group()
 def diode():
+    """Parent command of info, list, scan."""
     pass
 
 
@@ -136,9 +137,9 @@ def info(search):
 
     print(devices_list)
     arduino_device = DiodeExperiment(devices_list[0])
-    identificaion = arduino_device.get_identification()
+    identification = arduino_device.get_identification()
 
-    print(identificaion)
+    print(identification)
 
 
 @diode.command("list")
@@ -166,7 +167,9 @@ def view_list(search):
 
 # Command to start LED scan
 @diode.command("scan")
-@click.argument("port")
+@click.argument(
+    "port",
+)
 @click.option(
     "-s",
     "-start",
@@ -231,19 +234,12 @@ def view_scan(
     Savedata directory priority:
         (1) If output_directory correctly provided, savedata goes there.
         (2) If output_directoy not provided, savedata goes to current directory.
-
-    Raises:
-        SearchError: if provided search string does not yield a single connected device.
     \b
     Args:
         port (str): port connected to Arduino
-        starting_voltage (float): starting voltage of scan
-        stopping_voltage (float): stopping voltage of scan
-        repeats (int): amount of times each measurement is repeated
-        output (str): filename for savefile of data
-        output_directory (str): directory into which data is stored, if not given, store in current directory
-        graph (bool): toggle to graph data
-        shockley (bool): toggle to fit data to shockley formula
+
+    Raises:
+        SearchError: if provided search string does not yield a single connected device.
 
     """
 

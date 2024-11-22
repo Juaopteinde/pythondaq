@@ -5,6 +5,11 @@ from pythondaq.arduino_device import ArduinoVisaDevice, list_resources
 
 
 def list_connected_resources():
+    """Calls on list_resources in arduino_device in order to return list of connected resources.
+
+    Returns:
+        list of str: list with connected resources
+    """
     return list_resources()
 
 
@@ -28,6 +33,11 @@ class DiodeExperiment:
         self.arduino = ArduinoVisaDevice(port)
 
     def get_identification(self):
+        """Calls on ArduinoVisaDevice.get_identification in order to return identification string of connected resource.
+
+        Returns:
+            str: identification string of connected device
+        """
         return self.arduino.get_identification()
 
     def scan(self, start, stop, repeats):
@@ -101,3 +111,6 @@ class DiodeExperiment:
             sem_voltage_LED_list,
             sem_current_LED_list,
         )
+
+
+print(help(DiodeExperiment))
