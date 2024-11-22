@@ -5,10 +5,15 @@ import click
 import matplotlib.pyplot as plt
 import numpy as np
 from lmfit import Model
-from rich import print
 
 from pythondaq.arduino_device import ArduinoVisaDevice, list_resources
 from pythondaq.diode_experiment import DiodeExperiment
+
+
+class SearchError(Exception):
+    """Exception for when search str does not yield a single device."""
+
+    pass
 
 
 def plot_data(voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED):
@@ -247,6 +252,16 @@ def view_scan(
     starting_value = int(starting_voltage * V_to_ADC_step)
     stopping_value = int(stopping_voltage * V_to_ADC_step)
 
+    connected_ports = list_resources()
+    devices_list = []
+    for device in connected_ports:
+        if port in device:
+            devices_list.append(device)
+    if len(devices_list) > 1 or len(devices_list) == 0:
+        raise SearchError(
+            f"Search str must only return 1 device in diode list, not {len(devices_list)}"
+        )
+
     # Run the scan in diode_experiment.py
     LED_scan = DiodeExperiment(port)
     voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED = (
@@ -274,11 +289,11 @@ def view_scan(
     if shockley:
 
         def shockley(V_d, I_s, n, V_t):
+            print(I_s * (np.exp((V_d) / (n * V_t) - 1)))
             return I_s * (np.exp((V_d) / (n * V_t)) - 1)
 
         smodel = Model(shockley)
-        params = smodel.make_params()
-        params["V_t"].set(value=1, min=0)
+
         result = smodel.fit(currents_LED, V_d=voltages_LED, n=1.5, I_s=1e-9, V_t=1)
 
         print(result.fit_report())

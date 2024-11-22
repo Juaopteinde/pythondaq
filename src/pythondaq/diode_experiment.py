@@ -1,13 +1,7 @@
 import numpy as np
 from rich.progress import track
 
-from pythondaq.arduino_device import ArduinoVisaDevice, list_resources
-
-
-class SearchError(Exception):
-    """Exception for when search str does not yield a single device."""
-
-    pass
+from pythondaq.arduino_device import ArduinoVisaDevice
 
 
 class DiodeExperiment:
@@ -27,17 +21,7 @@ class DiodeExperiment:
         Args:
             port (str): port connected to arduino
         """
-        connected_ports = list_resources()
-        devices_list = []
-        for device in connected_ports:
-            if port in device:
-                devices_list.append(device)
-        if len(devices_list) > 1 or len(devices_list) == 0:
-            raise SearchError(
-                f"Search str must only return 1 device in diode list, not {len(devices_list)}"
-            )
-
-        self.arduino = ArduinoVisaDevice(devices_list[0])
+        self.arduino = ArduinoVisaDevice(port)
 
     def scan(self, start, stop, repeats):
         """Increase OUTPUT voltage on channel 0 from start to stop, measure INPUT voltage on channels 1 & 2, calculate voltages, currents, and errors for the LED.
