@@ -6,8 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from lmfit import Model
 
-from pythondaq.arduino_device import ArduinoVisaDevice, list_resources
-from pythondaq.diode_experiment import DiodeExperiment
+from pythondaq.diode_experiment import DiodeExperiment, list_connected_resources
 
 
 class SearchError(Exception):
@@ -124,7 +123,7 @@ def info(search):
         SearchError: if search string does not yield a single device
     """
 
-    connected_ports = list_resources()
+    connected_ports = list_connected_resources()
     devices_list = []
     for device in connected_ports:
         if search in device:
@@ -135,7 +134,8 @@ def info(search):
             f"Search str must only return 1 device in diode list, not {len(devices_list)}"
         )
 
-    arduino_device = ArduinoVisaDevice(devices_list[0])
+    print(devices_list)
+    arduino_device = DiodeExperiment(devices_list[0])
     identificaion = arduino_device.get_identification()
 
     print(identificaion)
@@ -149,7 +149,7 @@ def view_list(search):
     Args:
         search (str): string to look for in list of connected devices
     """
-    connected_ports = list_resources()
+    connected_ports = list_connected_resources()
     if search:
         search_devices = []
         for device in connected_ports:
@@ -232,6 +232,8 @@ def view_scan(
         (1) If output_directory correctly provided, savedata goes there.
         (2) If output_directoy not provided, savedata goes to current directory.
 
+    Raises:
+        SearchError: if provided search string does not yield a single connected device.
     \b
     Args:
         port (str): port connected to Arduino
@@ -243,16 +245,15 @@ def view_scan(
         graph (bool): toggle to graph data
         shockley (bool): toggle to fit data to shockley formula
 
-    Raises:
-        SearchError: if provided search string does not yield a single connected device.
     """
 
-    # Change voltage in Volt to ADC value
     V_to_ADC_step = 1023 / 3.3
     starting_value = int(starting_voltage * V_to_ADC_step)
     stopping_value = int(stopping_voltage * V_to_ADC_step)
 
-    connected_ports = list_resources()
+    # Check whether search string only applies to single device
+    # reason is code won't work with >1 devices
+    connected_ports = list_connected_resources()
     devices_list = []
     for device in connected_ports:
         if port in device:
@@ -262,7 +263,6 @@ def view_scan(
             f"Search str must only return 1 device in diode list, not {len(devices_list)}"
         )
 
-    # Run the scan in diode_experiment.py
     LED_scan = DiodeExperiment(port)
     voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED = (
         LED_scan.scan(starting_value, stopping_value, repeats)
@@ -270,11 +270,9 @@ def view_scan(
 
     print(voltages_LED, currents_LED)
 
-    # Plot only if user wants to
     if graph:
         plot_data(voltages_LED, currents_LED, errors_voltages_LED, errors_currents_LED)
 
-    # Save the data if a filename is given
     if output:
         save_data(
             currents_LED,
@@ -285,22 +283,32 @@ def view_scan(
             output_directory,
         )
 
-    # Fit data to shockley formula
     if shockley:
 
-        def shockley(V_d, I_s, n, V_t):
-            print(I_s * (np.exp((V_d) / (n * V_t) - 1)))
-            return I_s * (np.exp((V_d) / (n * V_t)) - 1)
+        # Shockley formula: I = Is * (exp(Vd/n*Vt) - 1)
+        # 'n' parameter has been left out
+        # reason is fit having trouble with 3rd parameter
+        def shockley(V_d, I_s, V_t):
+            return I_s * (np.exp((V_d) / (V_t)) - 1)
 
         smodel = Model(shockley)
-
-        result = smodel.fit(currents_LED, V_d=voltages_LED, n=1.5, I_s=1e-9, V_t=1)
+        params = smodel.make_params(I_s=0, V_t=0.01)
+        result = smodel.fit(currents_LED, params, V_d=voltages_LED)
 
         print(result.fit_report())
         V_t_fitted = result.params["V_t"].value
+        fitted_currents = result.best_fit
 
         k = (V_t_fitted * 1.602e-19) / 300
         print(f"Boltzmann constant = {k}")
+
+        plt.plot(voltages_LED, currents_LED, ".", label="Scan")
+        plt.plot(voltages_LED, fitted_currents, ".", label="Fit")
+        plt.legend(loc="best")
+        plt.title("Shockley fit of LED scan")
+        plt.xlabel("Voltage (V)")
+        plt.ylabel("Current (A)")
+        plt.show()
 
 
 if __name__ == "__main__":

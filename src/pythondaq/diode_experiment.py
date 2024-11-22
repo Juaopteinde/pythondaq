@@ -1,7 +1,11 @@
 import numpy as np
 from rich.progress import track
 
-from pythondaq.arduino_device import ArduinoVisaDevice
+from pythondaq.arduino_device import ArduinoVisaDevice, list_resources
+
+
+def list_connected_resources():
+    return list_resources()
 
 
 class DiodeExperiment:
@@ -22,6 +26,9 @@ class DiodeExperiment:
             port (str): port connected to arduino
         """
         self.arduino = ArduinoVisaDevice(port)
+
+    def get_identification(self):
+        return self.arduino.get_identification()
 
     def scan(self, start, stop, repeats):
         """Increase OUTPUT voltage on channel 0 from start to stop, measure INPUT voltage on channels 1 & 2, calculate voltages, currents, and errors for the LED.
