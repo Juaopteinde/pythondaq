@@ -37,8 +37,14 @@ class UserInterface(QtWidgets.QMainWindow):
             self.errors_voltages_LED,
             self.errors_currents_LED,
         ) = LED_scan.scan(
-            600, 900, 3
+            700, 900, 3
         )  # start stop repeats
+
+        self.voltage_array = np.array(self.voltages_LED)
+        self.current_array = np.array(self.currents_LED)
+        self.voltage_error_array = np.array(self.errors_voltages_LED)
+        self.current_error_array = np.array(self.errors_currents_LED)
+
         self.plot()
 
     def plot(
@@ -46,21 +52,22 @@ class UserInterface(QtWidgets.QMainWindow):
     ):
         """Plot the function given by user, along with given resolution and domain"""
         self.plot_widget.plot(
-            self.voltages_LED,
-            self.currents_LED,
+            self.voltage_array,
+            self.current_array,
             symbol="o",
             pen=None,
         )
 
         error_bars = pg.ErrorBarItem(
-            x=self.voltages_LED,
-            y=self.currents_LED,
-            width=2 * self.errors_voltages_LED,
-            height=2 * self.errors_currents_LED,
+            x=self.voltage_array,
+            y=self.current_array,
+            width=1 * self.voltage_error_array,
+            height=1 * self.current_error_array,
         )
         self.plot_widget.addItem(error_bars)
-        self.plot_widget.setLabel("left", "y-axis [units]")
-        self.plot_widget.setLabel("bottom", "x-axis [units]")
+        self.plot_widget.setLabel("top", "U-I scan of LED")
+        self.plot_widget.setLabel("left", "current [A]")
+        self.plot_widget.setLabel("bottom", "voltage [V]")
 
 
 def main():
