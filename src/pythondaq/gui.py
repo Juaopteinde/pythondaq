@@ -14,6 +14,8 @@ pg.setConfigOption("foreground", "k")
 
 
 class UserInterface(QtWidgets.QMainWindow):
+    """Graphical user interface for LED scan."""
+
     def __init__(self):
         super().__init__()
 
@@ -28,10 +30,11 @@ class UserInterface(QtWidgets.QMainWindow):
         mainHbox = QtWidgets.QHBoxLayout()
         mainVbox.addLayout(mainHbox)
 
-        # Create connected devices combobox
+        # Layout for choosing & identifying device
         deviceVbox = QtWidgets.QVBoxLayout()
         deviceHbox = QtWidgets.QHBoxLayout()
 
+        # Create & label device select combobox
         connecteddeviceVbox = QtWidgets.QVBoxLayout()
         connected_device_label = QtWidgets.QLabel("Connected port")
         connecteddeviceVbox.addWidget(connected_device_label)
@@ -40,15 +43,22 @@ class UserInterface(QtWidgets.QMainWindow):
         connecteddeviceVbox.addWidget(self.connected_device_combobox)
         deviceHbox.addLayout(connecteddeviceVbox)
 
+        # Create device identification button
+        identifyVbox = QtWidgets.QVBoxLayout()
+        identify_button_alignment_label = QtWidgets.QLabel(" ")
+        identifyVbox.addWidget(identify_button_alignment_label)
         identify_button = QtWidgets.QPushButton("Identify device")
-        deviceHbox.addWidget(identify_button)
-        deviceVbox.addLayout(deviceHbox)
+        identifyVbox.addWidget(identify_button)
+        deviceHbox.addLayout(identifyVbox)
 
+        deviceVbox.addLayout(deviceHbox)
+        mainVbox.addLayout(deviceVbox)
+
+        # Create read-only textfield for identification string
         self.device_identification_textbox = QtWidgets.QTextEdit()
         self.device_identification_textbox.setReadOnly(True)
-        deviceVbox.addWidget(self.device_identification_textbox)
-
-        mainVbox.addLayout(deviceVbox)
+        self.device_identification_textbox.setMaximumHeight(25)
+        mainVbox.addWidget(self.device_identification_textbox)
 
         # Create & label start value doublespinbox
         startVbox = QtWidgets.QVBoxLayout()
@@ -98,6 +108,7 @@ class UserInterface(QtWidgets.QMainWindow):
 
     @Slot()
     def identify(self):
+        """Set text in identification textbox to identification string of connected device."""
         port = self.connected_device_combobox.currentText()
 
         device = DiodeExperiment(port)
