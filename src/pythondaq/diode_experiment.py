@@ -111,6 +111,3 @@ class DiodeExperiment:
             sem_voltage_LED_list,
             sem_current_LED_list,
         )
-
-
-print(help(DiodeExperiment))

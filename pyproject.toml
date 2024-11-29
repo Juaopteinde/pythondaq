@@ -6,7 +6,7 @@ authors = ["Juaopteinde <juaopteinde@Outlook.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.12"
+python = ">=3.12,<3.14"
 matplotlib = "^3.9.2"
 numpy = "^2.1.3"
 pyvisa = "^1.14.1"
@@ -17,6 +17,7 @@ psutil = "^6.1.0"
 zeroconf = "^0.136.0"
 lmfit = "^1.3.2"
 rich = "^13.9.4"
+pyside6 = "^6.8.0.2"
 
 
 [build-system]
@@ -25,3 +26,4 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.scripts]
 diode = "pythondaq.cli:diode"
+window = "pythondaq.gui:main"
